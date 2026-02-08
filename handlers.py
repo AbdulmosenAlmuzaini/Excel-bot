@@ -1,0 +1,271 @@
+import os
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes
+from database import get_user, update_user_lang, register_user, log_interaction, get_stats, get_chat_history, clear_chat_history, get_user_state, update_user_state
+from i18n import get_text
+from config import ADMIN_ID, MAX_FILE_SIZE_MB
+from middleware import check_limits, get_faq_answer
+from groq_client import GroqClient
+from analysis import analyze_excel, is_valid_file
+from logger import log_error, log_info
+
+groq = GroqClient()
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    register_user(user_id)
+    
+    keyboard = [
+        [
+            InlineKeyboardButton("English 🇺🇸", callback_data='lang_en'),
+            InlineKeyboardButton("العربية 🇸🇦", callback_data='lang_ar')
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    # We don't know the language yet, so show the bilingual intro first
+    welcome_text = get_text("bot_intro", "en") + "\n\n" + get_text("welcome", "en")
+    await update.message.reply_text(welcome_text, reply_markup=reply_markup)
+
+async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    lang = query.data.split('_')[1]
+    user_id = query.from_user.id
+    update_user_lang(user_id, lang)
+    clear_chat_history(user_id) # Clear history to avoid language leakage
+    
+    await query.edit_message_text(get_text("lang_selected", lang))
+    await query.message.reply_text(get_text("help", lang))
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = get_user(update.effective_user.id)
+    lang = user[1] if user else "en"
+    await update.message.reply_text(get_text("help", lang))
+
+async def examples_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = get_user(update.effective_user.id)
+    lang = user[1] if user else "en"
+    await update.message.reply_text(get_text("examples", lang))
+
+async def lang_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    keyboard = [
+        [
+            InlineKeyboardButton("English 🇺🇸", callback_data='lang_en'),
+            InlineKeyboardButton("العربية 🇸🇦", callback_data='lang_ar')
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    user = get_user(user_id)
+    lang = user[1] if user else "en"
+    await update.message.reply_text(get_text("select_lang", lang), reply_markup=reply_markup)
+
+async def clarification_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    user_id = query.from_user.id
+    user = get_user(user_id)
+    lang = user[1] if user else "en"
+    
+    data = query.data.split('_')
+    action = data[1] # analysis, formula, chart, forecast, cleaning
+    
+    state, user_context = get_user_state(user_id)
+    user_context["goal"] = action
+    
+    # Transition based on choice
+    if action == "formula":
+        await query.edit_message_text(get_text("ask_column", lang))
+        user_context["missing"] = ["column"]
+    elif action == "analysis":
+        await query.edit_message_text(get_text("ask_analysis_goal", lang))
+        user_context["missing"] = ["goal_detail"]
+    elif action == "forecast":
+        await query.edit_message_text(get_text("ask_months", lang))
+        user_context["missing"] = ["months"]
+    elif action == "chart":
+        await query.edit_message_text(get_text("ask_chart_cols", lang))
+        user_context["missing"] = ["chart_cols"]
+    else: # cleaning
+        await query.edit_message_text(get_text("ask_column", lang))
+        user_context["missing"] = ["column"]
+        
+    update_user_state(user_id, "CLARIFYING", user_context)
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    lang = user[1] if user else "en"
+    query_text = update.message.text
+
+    # 1. Check Limits
+    if not check_limits(user_id):
+        await update.message.reply_text(get_text("limit_reached", lang))
+        return
+
+    # 2. State & Context
+    state, user_context = get_user_state(user_id)
+
+    if state == "CLARIFYING":
+        # Handle clarification follow-up
+        goal = user_context.get("goal")
+        missing = user_context.get("missing", [])
+        
+        if missing:
+            # Add gathered info to context
+            key = missing.pop(0)
+            user_context[key] = query_text
+            user_context["missing"] = missing
+            
+        if not missing:
+            # Everything gathered, resume
+            update_user_state(user_id, "NORMAL", {})
+            # Construct a rich prompt for AI
+            prompt = f"User Goal: {goal}. Context: {user_context}. Original Query: {user_context.get('original_query','')}. User's latest info: {query_text}. Give a complete solution."
+            await update.message.reply_chat_action("typing")
+            response = await groq.get_response(prompt, lang=lang)
+            if response:
+                await update_message_with_markdown_fallback(update, response)
+                log_interaction(user_id, query_text, response, "text")
+            return
+        else:
+            # Still missing something (in a real complex case we'd ask the next question)
+            update_user_state(user_id, "CLARIFYING", user_context)
+            return
+
+    # 3. Get Chat History (for NORMAL mode)
+    history = get_chat_history(user_id)
+
+    # 4. Intent Scoring
+    score = groq.get_intent_score(query_text, history=history)
+    
+    # 5. Topic Filtering (Flexible & Context-aware)
+    topic_status = groq.is_excel_related(query_text)
+    is_related = (topic_status is True) or (history) or (topic_status == "vague")
+    
+    # 6. Rejection (Last step)
+    # Only reject if certainly unrelated and score is very low
+    if not is_related and score < 30:
+        await update.message.reply_text(get_text("invalid_topic", lang))
+        return
+
+    # 7. Clarification (Preferred over rejection for borderline cases)
+    # If score is low OR topic is vague AND not already in a thread
+    if (score < 60 or topic_status == "vague") and not history:
+        attempts = user_context.get("attempts", 0) + 1
+        if attempts >= 2:
+            await update.message.reply_text(get_text("escalation_msg", lang))
+            update_user_state(user_id, "NORMAL", {"attempts": 0})
+            return
+            
+        user_context = {"attempts": attempts, "original_query": query_text}
+        update_user_state(user_id, "NORMAL", user_context) # Keep attempts count
+        
+        keyboard = [
+            [InlineKeyboardButton(get_text("opt_analysis", lang), callback_data='clarify_analysis')],
+            [InlineKeyboardButton(get_text("opt_formula", lang), callback_data='clarify_formula')],
+            [InlineKeyboardButton(get_text("opt_chart", lang), callback_data='clarify_chart')],
+            [InlineKeyboardButton(get_text("opt_forecast", lang), callback_data='clarify_forecast')],
+            [InlineKeyboardButton(get_text("opt_cleaning", lang), callback_data='clarify_cleaning')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(get_text("clarification_intro", lang), reply_markup=reply_markup)
+        return
+
+    # 6. Check FAQ Cache
+    faq_answer = get_faq_answer(query_text, lang)
+    if faq_answer:
+        await update.message.reply_text(faq_answer)
+        log_interaction(user_id, query_text, "FAQ_CACHE", "faq")
+        return
+
+    # 7. Call Groq with History
+    await update.message.reply_chat_action("typing")
+    response = await groq.get_response(query_text, lang=lang, history=history)
+    
+    if response:
+        await update_message_with_markdown_fallback(update, response)
+        log_interaction(user_id, query_text, response, "text")
+    else:
+        await update.message.reply_text(get_text("error_generic", lang))
+
+async def update_message_with_markdown_fallback(update, response):
+    try:
+        await update.message.reply_text(response, parse_mode="Markdown")
+    except Exception as e:
+        log_error(f"Markdown parsing error: {e}")
+        await update.message.reply_text(response)
+
+async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    lang = user[1] if user else "en"
+    doc = update.message.document
+
+    # 1. Check File Type
+    if not is_valid_file(doc.file_name):
+        await update.message.reply_text(get_text("invalid_topic", lang))
+        return
+
+    # 2. Check File Size
+    if doc.file_size > MAX_FILE_SIZE_MB * 1024 * 1024:
+        await update.message.reply_text(get_text("file_too_large", lang, MAX_FILE_SIZE_MB))
+        return
+
+    # 3. Check Limits
+    if not check_limits(user_id, is_file=True):
+        await update.message.reply_text(get_text("file_limit_reached", lang))
+        return
+
+    # 4. Process File
+    await update.message.reply_text(get_text("processing_file", lang))
+    
+    file = await context.bot.get_file(doc.file_id)
+    file_path = f"downloads/{doc.file_name}"
+    
+    if not os.path.exists("downloads"):
+        os.makedirs("downloads")
+        
+    await file.download_to_drive(file_path)
+    
+    # Analyze
+    analysis_result = analyze_excel(file_path)
+    
+    # Send analysis to Groq for insights with explicit language
+    prompt = f"Analyze this data summary and provide insights or forecasts:\n\n{analysis_result}"
+    await update.message.reply_chat_action("typing")
+    response = await groq.get_response(prompt, lang=lang)
+    
+    if response:
+        try:
+            await update.message.reply_text(response, parse_mode="Markdown")
+        except Exception as e:
+            # Fallback to plain text if Markdown parsing fails
+            log_error(f"Markdown parsing error (doc): {e}")
+            await update.message.reply_text(response)
+        log_interaction(user_id, f"FILE: {doc.file_name}", response, "file")
+    else:
+        await update.message.reply_text(get_text("error_generic", lang))
+    
+    # Cleanup
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+        
+    user_count, total_logs = get_stats()
+    # Simple error count check from logs
+    error_count = 0
+    if os.path.exists("logs/bot.log"):
+        with open("logs/bot.log", "r", encoding="utf-8") as f:
+            error_count = sum(1 for line in f if "ERROR" in line)
+            
+    user = get_user(update.effective_user.id)
+    lang = user[1] if user else "en"
+    
+    await update.message.reply_text(get_text("admin_stats", lang, user_count, total_logs, error_count))
