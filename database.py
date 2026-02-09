@@ -37,6 +37,17 @@ def init_db():
         type TEXT
     )
     ''')
+    
+    # Feedback table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS feedback (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        rating TEXT,
+        comment TEXT,
+        timestamp DATETIME
+    )
+    ''')
     conn.commit()
     conn.close()
 
@@ -172,3 +183,10 @@ def get_user_state(user_id):
             import json
             return row[0], json.loads(row[1])
     return "NORMAL", {}
+def log_feedback(user_id, rating, comment=None):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO feedback (user_id, rating, comment, timestamp) VALUES (?, ?, ?, ?)",
+                   (user_id, rating, comment, datetime.now()))
+    conn.commit()
+    conn.close()

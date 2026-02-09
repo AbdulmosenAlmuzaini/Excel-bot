@@ -1,7 +1,7 @@
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-from database import get_user, update_user_lang, register_user, log_interaction, get_stats, get_chat_history, clear_chat_history, get_user_state, update_user_state
+from database import get_user, update_user_lang, register_user, log_interaction, get_stats, get_chat_history, clear_chat_history, get_user_state, update_user_state, log_feedback
 from i18n import get_text
 from config import ADMIN_ID, MAX_FILE_SIZE_MB
 from middleware import check_limits, get_faq_answer
@@ -102,12 +102,32 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query_text = update.message.text
 
     # 1. Check Limits
-    if not check_limits(user_id):
+    is_allowed, msg_count = check_limits(user_id)
+    if not is_allowed:
         await update.message.reply_text(get_text("limit_reached", lang))
         return
 
+    # Proactive feedback: Every 10 messages
+    if msg_count > 0 and msg_count % 10 == 0:
+        keyboard = [
+            [
+                InlineKeyboardButton(get_text("feedback_rate_good", lang), callback_data='rate_good'),
+                InlineKeyboardButton(get_text("feedback_rate_bad", lang), callback_data='rate_bad')
+            ],
+            [InlineKeyboardButton(get_text("feedback_rate_suggestion", lang), callback_data='rate_suggest')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(get_text("feedback_interaction_prompt", lang), reply_markup=reply_markup)
+
     # 2. State & Context
     state, user_context = get_user_state(user_id)
+
+    # Process Wait Feedback state
+    if state == "WAIT_FEEDBACK":
+        log_feedback(user_id, "SUGGESTION", query_text)
+        update_user_state(user_id, "NORMAL", {})
+        await update.message.reply_text(get_text("feedback_thanks", lang))
+        return
 
     if state == "CLARIFYING":
         # Handle clarification follow-up
@@ -197,7 +217,10 @@ async def update_message_with_markdown_fallback(update, response):
         await update.message.reply_text(response, parse_mode="Markdown")
     except Exception as e:
         log_error(f"Markdown parsing error: {e}")
-        await update.message.reply_text(response)
+        # Offer feedback on error
+        keyboard = [[InlineKeyboardButton(get_text("feedback_rate_bad", lang) + " (Error)", callback_data='rate_bad')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(response, reply_markup=reply_markup)
 
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -216,7 +239,8 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # 3. Check Limits
-    if not check_limits(user_id, is_file=True):
+    is_allowed, msg_count = check_limits(user_id, is_file=True)
+    if not is_allowed:
         await update.message.reply_text(get_text("file_limit_reached", lang))
         return
 
@@ -269,3 +293,36 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user[1] if user else "en"
     
     await update.message.reply_text(get_text("admin_stats", lang, user_count, total_logs, error_count))
+
+async def feedback_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    lang = user[1] if user else "en"
+    
+    keyboard = [
+        [
+            InlineKeyboardButton(get_text("feedback_rate_good", lang), callback_data='rate_good'),
+            InlineKeyboardButton(get_text("feedback_rate_bad", lang), callback_data='rate_bad')
+        ],
+        [InlineKeyboardButton(get_text("feedback_rate_suggestion", lang), callback_data='rate_suggest')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(get_text("feedback_cmd_prompt", lang), reply_markup=reply_markup)
+
+async def feedback_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = update.effective_user.id
+    user = get_user(user_id)
+    lang = user[1] if user else "en"
+    
+    await query.answer()
+    
+    if query.data == 'rate_good':
+        log_feedback(user_id, "GOOD")
+        await query.edit_message_text(get_text("feedback_thanks", lang))
+    elif query.data == 'rate_bad':
+        log_feedback(user_id, "BAD")
+        await query.edit_message_text(get_text("feedback_thanks", lang))
+    elif query.data == 'rate_suggest':
+        update_user_state(user_id, "WAIT_FEEDBACK", {})
+        await query.edit_message_text(get_text("feedback_ask_suggestion", lang))

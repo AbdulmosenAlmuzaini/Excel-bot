@@ -25,18 +25,25 @@ STRINGS = {
         "ask_months": "How many past months of data do you have?",
         "ask_chart_cols": "Which columns should be used for the chart?",
         "escalation_msg": "To help you better, please upload your Excel file or share a screenshot.",
+        "feedback_cmd_prompt": "We value your feedback! Please rate your experience so far:",
+        "feedback_thanks": "Thank you for your feedback! It helps us improve for everyone. 😊",
+        "feedback_rate_good": "👍 Good",
+        "feedback_rate_bad": "👎 Bad",
+        "feedback_rate_suggestion": "💡 Suggestion",
+        "feedback_ask_suggestion": "Please type your suggestion or comment briefly:",
+        "feedback_interaction_prompt": "You've been using the bot for a while! Was my last answer helpful?",
         "system_prompt_rules": """
-**Response Structure (VERY IMPORTANT):**
-1. **Quick Solution**: Start with the fastest/most direct formula or answer immediately (e.g., "Quick Solution: =UNIQUE(A:A)").
-2. **Details & Alternatives**: After the quick solution, provide brief explanations, alternatives, or conditional cases.
-3. Use Markdown for formulas and code.
-4. Answer ONLY in English. Do NOT use any other language.
+**Response Style (VERY IMPORTANT):**
+1. **Simple & Direct**: Provide ONE simple, clear way to do it first. Do NOT use superlatives like "fastest", "best", or "most direct".
+2. **Progressive Detail**: After the simple answer, ask the user if they would like to see an alternative method or more details.
+   - Example: "Here is a simple way to do this: ... Would you like another approach?"
+3. **Format**: Use Markdown for formulas and code blocks.
+4. **Language**: Answer ONLY in English. Do NOT use any other language.
 
 **Handling Vague Requests:**
-If the user's request is unclear, vague, or not obviously about Excel/Sheets:
-- Do NOT refuse immediately if there's a chance it's related.
-- Instead, ask 2-3 specific guided clarification questions (e.g., "Are you trying to analyze data or build a formula?", "What application are you using (Excel or Google Sheets)?", "Could you specify the columns involved?").
-- Be helpful and proactive in guiding them.
+If the request is unclear:
+- Do NOT refuse immediately.
+- Ask 2-3 specific guided questions to clarify (e.g., "What application are you using?", "Which columns are involved?").
 """
     },
     "ar": {
@@ -65,18 +72,25 @@ If the user's request is unclear, vague, or not obviously about Excel/Sheets:
         "ask_months": "كم عدد الأشهر السابقة المتوفرة لديك؟",
         "ask_chart_cols": "ما هي الأعمدة التي تريد استخدامها للرسم البياني؟",
         "escalation_msg": "لمساعدتك بشكل أفضل، يرجى رفع ملف Excel أو مشاركة لقطة شاشة.",
+        "feedback_cmd_prompt": "نحن نقدر رأيك! يرجى تقييم تجربتك حتى الآن:",
+        "feedback_thanks": "شكراً جزيلاً لتقييمك! هذا يساعدنا على تحسين الخدمة للجميع. 😊",
+        "feedback_rate_good": "👍 ممتاز",
+        "feedback_rate_bad": "👎 سيء",
+        "feedback_rate_suggestion": "💡 اقتراح",
+        "feedback_ask_suggestion": "يرجى كتابة اقتراحك أو ملاحظتك باختصار:",
+        "feedback_interaction_prompt": "لقد استخدمت البوت لفترة! هل كانت إجابتي الأخيرة مفيدة لك؟",
         "system_prompt_rules": """
-**هيكل الإجابة (هام جداً):**
-1. **الحل السريع**: ابدأ بأسرع وأبشر صيغة أو إجابة مباشرة فوراً (مثال: "أسرع حل: =UNIQUE(A:A)").
-2. **التفاصيل والبدائل**: بعد الحل السريع، قدم شروحات موجزة، بدائل، أو حالات مشروطة.
-3. استخدم Markdown للصيغ والأكواد.
-4. أجب باللغة العربية فقط. لا تستخدم أي لغة أخرى.
+**أسلوب الإجابة (هام جداً):**
+1. **بسيط ومباشر**: قدم طريقة واحدة بسيطة وواضحة للقيام بذلك أولاً. لا تستخدم صيغ التفضيل مثل "أسرع حل" أو "أفضل طريقة".
+2. **التدرج في التفاصيل**: بعد الإجابة البسيطة، اسأل المستخدم إذا كان يرغب في رؤية طريقة بديلة أو مزيد من التفاصيل.
+   - مثال: "إليك طريقة بسيطة للقيام بذلك: ... هل تود رؤية طريقة أخرى؟"
+3. **التنسيق**: استخدم Markdown للصيغ وأكواد البرمجة.
+4. **اللغة**: أجب باللغة العربية فقط. لا تستخدم أي لغة أخرى.
 
 **التعامل مع الطلبات غير الواضحة:**
-إذا كان طلب المستخدم غير واضح أو غامض أو لا يبدو متعلقاً بـ Excel/Sheets بشكل صريح:
-- لا ترفض الطلب فوراً إذا كان هناك احتمال لتعلقه بالمجال.
-- بدلاً من ذلك، اطرح 2-3 أسئلة توضيحية محددة (مثال: "هل تحاول تحليل بيانات أم إنشاء صيغة؟"، "ما هو التطبيق الذي تستخدمه (Excel أم Google Sheets)؟"، "هل يمكنك تحديد الأعمدة المعنية؟").
-- كن متعاوناً ومبادراً في توجيه المستخدم.
+إذا كان الطلب غير واضح:
+- لا ترفض الطلب فوراً.
+- اطرح 2-3 أسئلة توضيحية محددة (مثال: "ما هو التطبيق الذي تستخدمه؟"، "ما هي الأعمدة المعنية؟").
 """
     }
 }

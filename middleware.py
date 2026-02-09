@@ -7,8 +7,8 @@ def check_limits(user_id, is_file=False):
     msg_count, file_count = check_and_update_limits(user_id, is_file)
     
     if is_file:
-        return file_count <= DAILY_FILE_LIMIT
-    return msg_count <= DAILY_MSG_LIMIT
+        return file_count <= DAILY_FILE_LIMIT, msg_count
+    return msg_count <= DAILY_MSG_LIMIT, msg_count
 
 def get_faq_answer(query, lang):
     query_lower = query.lower()
