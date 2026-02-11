@@ -48,6 +48,17 @@ def init_db():
         timestamp DATETIME
     )
     ''')
+    
+    # Error logs table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS error_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        category TEXT,
+        message TEXT,
+        timestamp DATETIME
+    )
+    ''')
     conn.commit()
     conn.close()
 
@@ -124,8 +135,21 @@ def get_stats():
     user_count = cursor.fetchone()[0]
     cursor.execute("SELECT COUNT(*) FROM logs")
     total_logs = cursor.fetchone()[0]
+    
+    # Error breakdown
+    cursor.execute("SELECT category, COUNT(*) FROM error_logs GROUP BY category")
+    error_breakdown = cursor.fetchall()
+    
     conn.close()
-    return user_count, total_logs
+    return user_count, total_logs, error_breakdown
+
+def log_error_to_db(user_id, category, message):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO error_logs (user_id, category, message, timestamp) VALUES (?, ?, ?, ?)",
+                   (user_id, category, message, datetime.now()))
+    conn.commit()
+    conn.close()
 
 def get_chat_history(user_id, limit=5):
     conn = sqlite3.connect(DB_NAME)

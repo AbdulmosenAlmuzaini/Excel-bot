@@ -13,7 +13,7 @@ class GroqClient:
 
     async def get_response(self, user_query, lang="en", history=None):
         if not self.api_key:
-            log_error("GROQ_API_KEY is missing")
+            log_error("GROQ_API_KEY is missing", category="AI")
             return "Error: API Key missing."
 
         # Hardcoded base prompt
@@ -44,12 +44,12 @@ If a question is unrelated, politely decline in the chosen language.
             async with httpx.AsyncClient() as client:
                 response = await client.post(self.base_url, headers=self.headers, json=payload, timeout=30.0)
                 if response.status_code != 200:
-                    log_error(f"Groq API Error {response.status_code}: {response.text}")
+                    log_error(f"Groq API Error {response.status_code}: {response.text}", category="AI")
                     return None
                 data = response.json()
                 return data["choices"][0]["message"]["content"]
         except Exception as e:
-            log_error(f"Groq Request Exception: {e}")
+            log_error(f"Groq Request Exception: {e}", category="NETWORK")
             return None
 
     def get_intent_score(self, text, history=None):

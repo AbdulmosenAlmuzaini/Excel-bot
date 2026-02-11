@@ -16,11 +16,18 @@ logging.basicConfig(
 
 logger = logging.getLogger("ExcelBot")
 
-def log_error(error_msg, user_id=None):
+def log_error(error_msg, user_id=None, category="INTERNAL"):
     if user_id:
-        logger.error(f"User {user_id}: {error_msg}")
+        logger.error(f"[{category}] User {user_id}: {error_msg}")
     else:
-        logger.error(error_msg)
+        logger.error(f"[{category}] {error_msg}")
+    
+    # Log to DB as well
+    try:
+        from database import log_error_to_db
+        log_error_to_db(user_id, category, error_msg)
+    except Exception as e:
+        logger.error(f"Failed to log error to DB: {e}")
 
 def log_info(info_msg):
     logger.info(info_msg)

@@ -216,7 +216,7 @@ async def update_message_with_markdown_fallback(update, response):
     try:
         await update.message.reply_text(response, parse_mode="Markdown")
     except Exception as e:
-        log_error(f"Markdown parsing error: {e}")
+        log_error(f"Markdown parsing error: {e}", category="FORMATTING")
         # Offer feedback on error
         keyboard = [[InlineKeyboardButton(get_text("feedback_rate_bad", lang) + " (Error)", callback_data='rate_bad')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -268,7 +268,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(response, parse_mode="Markdown")
         except Exception as e:
             # Fallback to plain text if Markdown parsing fails
-            log_error(f"Markdown parsing error (doc): {e}")
+            log_error(f"Markdown parsing error (doc): {e}", category="FORMATTING")
             await update.message.reply_text(response)
         log_interaction(user_id, f"FILE: {doc.file_name}", response, "file")
     else:
@@ -282,17 +282,22 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
         
-    user_count, total_logs = get_stats()
-    # Simple error count check from logs
-    error_count = 0
-    if os.path.exists("logs/bot.log"):
-        with open("logs/bot.log", "r", encoding="utf-8") as f:
-            error_count = sum(1 for line in f if "ERROR" in line)
+    user_count, total_logs, error_breakdown = get_stats()
+    
+    # Format error breakdown
+    err_text = ""
+    total_errors = 0
+    if error_breakdown:
+        err_text = "\n\nError Breakdown:"
+        for cat, count in error_breakdown:
+            err_text += f"\n- {cat}: {count}"
+            total_errors += count
             
     user = get_user(update.effective_user.id)
     lang = user[1] if user else "en"
     
-    await update.message.reply_text(get_text("admin_stats", lang, user_count, total_logs, error_count))
+    final_stats = get_text("admin_stats", lang, user_count, total_logs, total_errors) + err_text
+    await update.message.reply_text(final_stats)
 
 async def feedback_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
