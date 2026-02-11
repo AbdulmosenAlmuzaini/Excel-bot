@@ -59,6 +59,17 @@ def init_db():
         timestamp DATETIME
     )
     ''')
+    
+    # Full Chat Logs table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS chat_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        user_message TEXT,
+        bot_reply TEXT,
+        timestamp DATETIME
+    )
+    ''')
     conn.commit()
     conn.close()
 
@@ -140,8 +151,40 @@ def get_stats():
     cursor.execute("SELECT category, COUNT(*) FROM error_logs GROUP BY category")
     error_breakdown = cursor.fetchall()
     
+    cursor.execute("SELECT COUNT(*) FROM chat_logs")
+    chat_log_count = cursor.fetchone()[0]
+    
     conn.close()
-    return user_count, total_logs, error_breakdown
+    return user_count, total_logs, error_breakdown, chat_log_count
+
+def log_chat(user_id, user_message, bot_reply):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO chat_logs (user_id, user_message, bot_reply, timestamp) VALUES (?, ?, ?, ?)",
+                   (user_id, user_message, bot_reply, datetime.now()))
+    conn.commit()
+    conn.close()
+
+def get_admin_logs(limit=20, user_id=None):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    if user_id:
+        cursor.execute("SELECT * FROM chat_logs WHERE user_id = ? ORDER BY timestamp DESC LIMIT ?", (user_id, limit))
+    else:
+        cursor.execute("SELECT * FROM chat_logs ORDER BY timestamp DESC LIMIT ?", (limit,))
+    logs = cursor.fetchall()
+    conn.close()
+    return logs
+
+def export_logs_to_excel():
+    import pandas as pd
+    conn = sqlite3.connect(DB_NAME)
+    df = pd.read_sql_query("SELECT * FROM chat_logs", conn)
+    conn.close()
+    
+    file_path = "chat_logs_export.xlsx"
+    df.to_excel(file_path, index=False)
+    return file_path
 
 def log_error_to_db(user_id, category, message):
     conn = sqlite3.connect(DB_NAME)

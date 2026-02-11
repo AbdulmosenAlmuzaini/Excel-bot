@@ -1,7 +1,7 @@
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-from database import get_user, update_user_lang, register_user, log_interaction, get_stats, get_chat_history, clear_chat_history, get_user_state, update_user_state, log_feedback
+from database import get_user, update_user_lang, register_user, log_interaction, get_stats, get_chat_history, clear_chat_history, get_user_state, update_user_state, log_feedback, log_chat, get_admin_logs, export_logs_to_excel
 from i18n import get_text
 from config import ADMIN_ID, MAX_FILE_SIZE_MB
 from middleware import check_limits, get_faq_answer
@@ -150,6 +150,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if response:
                 await update_message_with_markdown_fallback(update, response)
                 log_interaction(user_id, query_text, response, "text")
+                log_chat(user_id, prompt, response)
             return
         else:
             # Still missing something (in a real complex case we'd ask the next question)
@@ -209,6 +210,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if response:
         await update_message_with_markdown_fallback(update, response)
         log_interaction(user_id, query_text, response, "text")
+        log_chat(user_id, query_text, response)
     else:
         await update.message.reply_text(get_text("error_generic", lang))
 
@@ -271,6 +273,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
             log_error(f"Markdown parsing error (doc): {e}", category="FORMATTING")
             await update.message.reply_text(response)
         log_interaction(user_id, f"FILE: {doc.file_name}", response, "file")
+        log_chat(user_id, f"FILE: {doc.file_name} (Analysis: {analysis_result[:100]}...)", response)
     else:
         await update.message.reply_text(get_text("error_generic", lang))
     
@@ -282,7 +285,7 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
         
-    user_count, total_logs, error_breakdown = get_stats()
+    user_count, total_logs, error_breakdown, chat_log_count = get_stats()
     
     # Format error breakdown
     err_text = ""
@@ -297,7 +300,54 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = user[1] if user else "en"
     
     final_stats = get_text("admin_stats", lang, user_count, total_logs, total_errors) + err_text
+    final_stats += f"\n\nTotal Chat Logs: {chat_log_count}"
     await update.message.reply_text(final_stats)
+
+async def logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    
+    args = context.args
+    limit = 20
+    target_user = None
+    
+    if args:
+        if args[0].isdigit():
+            limit = int(args[0])
+        elif args[0] == "user" and len(args) > 1:
+            target_user = int(args[1])
+            if len(args) > 2 and args[2].isdigit():
+                limit = int(args[2])
+    
+    logs = get_admin_logs(limit, target_user)
+    if not logs:
+        await update.message.reply_text("No logs found.")
+        return
+    
+    msg = "Recent Chat Logs:\n"
+    for log in logs:
+        # id, user_id, user_message, bot_reply, timestamp
+        msg += f"\n👤 User {log[1]} ({log[4]}):\nQ: {log[2][:100]}...\nA: {log[3][:100]}...\n---"
+        if len(msg) > 3500: # Telegram message limit
+            await update.message.reply_text(msg)
+            msg = ""
+    
+    if msg:
+        await update.message.reply_text(msg)
+
+async def export_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    
+    await update.message.reply_text("Generating Excel report...")
+    try:
+        file_path = export_logs_to_excel()
+        with open(file_path, 'rb') as f:
+            await update.message.reply_document(document=f, filename=file_path)
+        os.remove(file_path)
+    except Exception as e:
+        log_error(f"Export logs error: {e}")
+        await update.message.reply_text("Failed to export logs.")
 
 async def feedback_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id

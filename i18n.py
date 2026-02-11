@@ -1,6 +1,6 @@
 STRINGS = {
     "en": {
-        "bot_intro": "Welcome to the Excel & Google Sheets Expert Bot! 🚀\nI can help you build advanced formulas, analyze complex data, create charts, and forecast trends. 📊\n\nأهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊",
+        "bot_intro": "Welcome to the Excel & Google Sheets Expert Bot! 🚀\nI can help you build advanced formulas, analyze complex data, create charts, and forecast trends. 📊\n\nأهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊\n\n⚠️ *Messages may be logged for improvement purposes.*",
         "welcome": "Please select your preferred language / يرجى اختيار لغتك المفضلة:",
         "lang_selected": "Language set to English.",
         "help": "I can help you with Excel formulas, Google Sheets functions, and data analysis. Just ask your question or upload an Excel file.",
@@ -44,10 +44,11 @@ STRINGS = {
 If the request is unclear:
 - Do NOT refuse immediately.
 - Ask 2-3 specific guided questions to clarify (e.g., "What application are you using?", "Which columns are involved?").
-"""
+""",
+        "logging_disclaimer": "⚠️ *Messages may be logged for improvement purposes.*"
     },
     "ar": {
-        "bot_intro": "أهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊",
+        "bot_intro": "أهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊\n\n⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
         "welcome": "يرجى اختيار لغتك المفضلة / Please select your preferred language:",
         "lang_selected": "تم ضبط اللغة إلى العربية.",
         "help": "يمكنني مساعدتك في صيغ Excel، ووظائف Google Sheets، وتحليل البيانات. فقط اطرح سؤالك أو ارفع ملف Excel.",
@@ -91,7 +92,8 @@ If the request is unclear:
 إذا كان الطلب غير واضح:
 - لا ترفض الطلب فوراً.
 - اطرح 2-3 أسئلة توضيحية محددة (مثال: "ما هو التطبيق الذي تستخدمه؟"، "ما هي الأعمدة المعنية؟").
-"""
+""",
+        "logging_disclaimer": "⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*"
     }
 }
 
