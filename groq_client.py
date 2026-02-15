@@ -1,11 +1,14 @@
 import httpx
 from config import GROQ_API_KEY, SYSTEM_PROMPT
-from logger import log_error
+from logger import log_error, log_info
+from youtube_client import YouTubeClient
 
 class GroqClient:
     def __init__(self):
         self.api_key = GROQ_API_KEY
+        self.system_prompt = SYSTEM_PROMPT
         self.base_url = "https://api.groq.com/openai/v1/chat/completions"
+        self.yt_client = YouTubeClient()
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -15,6 +18,17 @@ class GroqClient:
         if not self.api_key:
             log_error("GROQ_API_KEY is missing", category="AI")
             return "Error: API Key missing."
+
+        # 1. Check for relevant YouTube tutorial first
+        video_suggestion = ""
+        relevant_video = self.yt_client.find_relevant_video(user_query)
+        if relevant_video:
+            video_url = f"https://www.youtube.com/watch?v={relevant_video['id']}"
+            if lang == "ar":
+                video_suggestion = f"💡 قد يهمك هذا الفيديو التعليمي: [{relevant_video['title']}]({video_url})\n\n"
+            else:
+                video_suggestion = f"💡 You might find this tutorial helpful: [{relevant_video['title']}]({video_url})\n\n"
+            log_info(f"Found relevant YouTube video for '{user_query}': {relevant_video['title']}", category="YouTube")
 
         # Hardcoded base prompt
         base_prompt = """
@@ -47,7 +61,8 @@ If a question is unrelated, politely decline in the chosen language.
                     log_error(f"Groq API Error {response.status_code}: {response.text}", category="AI")
                     return None
                 data = response.json()
-                return data["choices"][0]["message"]["content"]
+                response_text = data["choices"][0]["message"]["content"]
+                return f"{video_suggestion}{response_text}"
         except Exception as e:
             log_error(f"Groq Request Exception: {e}", category="NETWORK")
             return None

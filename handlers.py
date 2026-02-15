@@ -4,12 +4,14 @@ from telegram.ext import ContextTypes
 from database import get_user, update_user_lang, register_user, log_interaction, get_stats, get_chat_history, clear_chat_history, get_user_state, update_user_state, log_feedback, log_chat, get_admin_logs, export_logs_to_excel
 from i18n import get_text
 from config import ADMIN_ID, MAX_FILE_SIZE_MB
+from youtube_client import YouTubeClient
 from middleware import check_limits, get_faq_answer
 from groq_client import GroqClient
 from analysis import analyze_excel, is_valid_file
 from logger import log_error, log_info
 
 groq = GroqClient()
+yt_client = YouTubeClient()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -402,6 +404,55 @@ async def export_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     except Exception as e:
         log_error(f"Export logs error: {e}")
         await update.message.reply_text("Failed to export logs.")
+
+async def learn_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = get_user(update.effective_user.id)
+    lang = user[1] if user else "en"
+    
+    keyboard = [
+        [InlineKeyboardButton(get_text("learn_beginner", lang), callback_data='learn_cat_beginner')],
+        [InlineKeyboardButton(get_text("learn_intermediate", lang), callback_data='learn_cat_intermediate')],
+        [InlineKeyboardButton(get_text("learn_advanced", lang), callback_data='learn_cat_advanced')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(get_text("learn_intro", lang), reply_markup=reply_markup, parse_mode="Markdown")
+
+async def learning_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    user = get_user(query.from_user.id)
+    lang = user[1] if user else "en"
+    data = query.data
+    
+    if data == "learn_main":
+        keyboard = [
+            [InlineKeyboardButton(get_text("learn_beginner", lang), callback_data='learn_cat_beginner')],
+            [InlineKeyboardButton(get_text("learn_intermediate", lang), callback_data='learn_cat_intermediate')],
+            [InlineKeyboardButton(get_text("learn_advanced", lang), callback_data='learn_cat_advanced')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(get_text("learn_intro", lang), reply_markup=reply_markup, parse_mode="Markdown")
+        return
+
+    if data.startswith("learn_cat_"):
+        level = data.replace("learn_cat_", "")
+        videos = yt_client.get_videos_by_level(level)
+        
+        if not videos:
+            await query.edit_message_text("No videos found in this category yet.",
+                                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(get_text("learn_back", lang), callback_data='learn_main')]]))
+            return
+
+        keyboard = []
+        for video in videos:
+            keyboard.append([InlineKeyboardButton(f"🎬 {video['title']}", url=f"https://www.youtube.com/watch?v={video['id']}")])
+        
+        keyboard.append([InlineKeyboardButton(get_text("learn_back", lang), callback_data='learn_main')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        level_label = get_text(f"learn_{level}", lang)
+        await query.edit_message_text(f"{level_label}\n\n{get_text('learn_video_intro', lang)}", reply_markup=reply_markup)
 
 async def feedback_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id

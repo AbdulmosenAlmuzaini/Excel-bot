@@ -1,0 +1,84 @@
+[
+    {
+        "id": "qMTCX-MAn6o",
+        "title": "Excel for Beginners",
+        "level": "Beginner",
+        "tags": [
+            "beginner",
+            "intro",
+            "basics",
+            "getting started",
+            "interface",
+            "cells",
+            "rows",
+            "columns"
+        ]
+    },
+    {
+        "id": "n6VOfzN9tRE",
+        "title": "Basic Formulas: SUM, AVERAGE, COUNT",
+        "level": "Beginner",
+        "tags": [
+            "sum",
+            "average",
+            "count",
+            "basic formulas",
+            "arithmetic",
+            "total",
+            "avg"
+        ]
+    },
+    {
+        "id": "f_p48i5Wcl8",
+        "title": "VLOOKUP Masterclass",
+        "level": "Intermediate",
+        "tags": [
+            "vlookup",
+            "lookup",
+            "find data",
+            "search",
+            "table array",
+            "reference"
+        ]
+    },
+    {
+        "id": "3kbk77mJp_0",
+        "title": "Pivot Tables for Data Analysis",
+        "level": "Intermediate",
+        "tags": [
+            "pivot table",
+            "analysis",
+            "summary",
+            "report",
+            "group data",
+            "aggregate"
+        ]
+    },
+    {
+        "id": "W6L9_u4S5Ww",
+        "title": "Advanced VBA & Macros",
+        "level": "Advanced",
+        "tags": [
+            "vba",
+            "macro",
+            "automation",
+            "scripting",
+            "backend",
+            "developer tab",
+            "coding"
+        ]
+    },
+    {
+        "id": "mXf9cK_S-mE",
+        "title": "Forecasting & Predictive Analytics",
+        "level": "Advanced",
+        "tags": [
+            "forecast",
+            "trends",
+            "prediction",
+            "statistics",
+            "data science",
+            "regression"
+        ]
+    }
+]

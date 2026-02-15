@@ -5,9 +5,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 ADMIN_ID = int(os.getenv("ADMIN_ID", 0))
 
+# Groq
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+SYSTEM_PROMPT = os.getenv("SYSTEM_PROMPT")
+
+# YouTube
+YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY") # User to provide in .env
+YOUTUBE_PLAYLIST_ID = "PLof3yw6ZFPFjik6ifGwXs68DLS60OPHYM"
+
+# Limits
 DAILY_MSG_LIMIT = int(os.getenv("DAILY_MSG_LIMIT", 50))
 DAILY_FILE_LIMIT = int(os.getenv("DAILY_FILE_LIMIT", 1))
 MAX_FILE_SIZE_MB = int(os.getenv("MAX_FILE_SIZE_MB", 5))

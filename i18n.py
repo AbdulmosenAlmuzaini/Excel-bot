@@ -52,7 +52,13 @@ If the request is unclear:
         "ex_analysis": "Data Analysis",
         "ex_protect": "Protect File",
         "ex_other": "Other Question",
-        "ex_other_prompt": "Please describe your issue or upload an Excel file, and I will help you step-by-step."
+        "ex_other_prompt": "Please describe your issue or upload an Excel file, and I will help you step-by-step.",
+        "learn_intro": "🎓 *Excel Learning Center*\nSelect your proficiency level to see relevant tutorials:",
+        "learn_beginner": "🟢 Beginner",
+        "learn_intermediate": "🟡 Intermediate",
+        "learn_advanced": "🔴 Advanced",
+        "learn_video_intro": "Select a tutorial to watch on YouTube:",
+        "learn_back": "⬅️ Back to Categories"
     },
     "ar": {
         "bot_intro": "أهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊\n\n⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
@@ -107,7 +113,13 @@ If the request is unclear:
         "ex_analysis": "تحليل البيانات",
         "ex_protect": "حماية الملف",
         "ex_other": "سؤال آخر",
-        "ex_other_prompt": "يرجى وصف مشكلتك أو رفع ملف إكسل، وسأقوم بمساعدتك خطوة بخطوة."
+        "ex_other_prompt": "يرجى وصف مشكلتك أو رفع ملف إكسل، وسأقوم بمساعدتك خطوة بخطوة.",
+        "learn_intro": "🎓 *مركز تعلم إكسل*\nاختر مستوى مهارتك لمشاهدة الدروس التعليمية ذات الصلة:",
+        "learn_beginner": "🟢 مبتدئ",
+        "learn_intermediate": "🟡 متوسط",
+        "learn_advanced": "🔴 متقدم",
+        "learn_video_intro": "اختر درساً لمشاهدته على YouTube:",
+        "learn_back": "⬅️ العودة للتصنيفات"
     }
 }
 
