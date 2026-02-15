@@ -37,7 +37,43 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     clear_chat_history(user_id) # Clear history to avoid language leakage
     
     await query.edit_message_text(get_text("lang_selected", lang))
+    await show_quick_start(query.message, context, lang)
     await query.message.reply_text(get_text("help", lang))
+
+async def show_quick_start(message, context, lang):
+    keyboard = [
+        [InlineKeyboardButton(get_text("ex_avg", lang), callback_data='ex_avg')],
+        [InlineKeyboardButton(get_text("ex_dup", lang), callback_data='ex_dup')],
+        [InlineKeyboardButton(get_text("ex_sales", lang), callback_data='ex_sales')],
+        [InlineKeyboardButton(get_text("ex_forecast", lang), callback_data='ex_forecast')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await message.reply_text(get_text("quick_start_prompt", lang), reply_markup=reply_markup)
+
+async def example_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    user_id = query.from_user.id
+    user = get_user(user_id)
+    lang = user[1] if user else "en"
+    
+    example_key = query.data # e.g., 'ex_avg'
+    example_text = get_text(example_key, lang)
+    
+    # 1. Inform the user what's happening
+    await query.message.reply_text(f"🚀 *{example_text}*", parse_mode="Markdown")
+    
+    # 2. Call Groq
+    await query.message.reply_chat_action("typing")
+    response = await groq.get_response(example_text, lang=lang)
+    
+    if response:
+        await update_message_with_markdown_fallback(query, response, lang)
+        log_interaction(user_id, f"EXAMPLE: {example_text}", response, "text")
+        log_chat(user_id, f"EXAMPLE: {example_text}", response)
+    else:
+        await query.message.reply_text(get_text("error_generic", lang))
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(update.effective_user.id)
@@ -148,7 +184,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_chat_action("typing")
             response = await groq.get_response(prompt, lang=lang)
             if response:
-                await update_message_with_markdown_fallback(update, response)
+                await update_message_with_markdown_fallback(update, response, lang)
                 log_interaction(user_id, query_text, response, "text")
                 log_chat(user_id, prompt, response)
             return
@@ -208,13 +244,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     response = await groq.get_response(query_text, lang=lang, history=history)
     
     if response:
-        await update_message_with_markdown_fallback(update, response)
+        await update_message_with_markdown_fallback(update, response, lang)
         log_interaction(user_id, query_text, response, "text")
         log_chat(user_id, query_text, response)
     else:
         await update.message.reply_text(get_text("error_generic", lang))
 
-async def update_message_with_markdown_fallback(update, response):
+async def update_message_with_markdown_fallback(update, response, lang):
     try:
         await update.message.reply_text(response, parse_mode="Markdown")
     except Exception as e:

@@ -45,7 +45,12 @@ If the request is unclear:
 - Do NOT refuse immediately.
 - Ask 2-3 specific guided questions to clarify (e.g., "What application are you using?", "Which columns are involved?").
 """,
-        "logging_disclaimer": "⚠️ *Messages may be logged for improvement purposes.*"
+        "logging_disclaimer": "⚠️ *Messages may be logged for improvement purposes.*",
+        "quick_start_prompt": "Try one of these examples 💡:",
+        "ex_avg": "Calculate Average",
+        "ex_dup": "Remove Duplicates",
+        "ex_sales": "Analyze Sales",
+        "ex_forecast": "Forecast Trends"
     },
     "ar": {
         "bot_intro": "أهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊\n\n⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
@@ -93,7 +98,12 @@ If the request is unclear:
 - لا ترفض الطلب فوراً.
 - اطرح 2-3 أسئلة توضيحية محددة (مثال: "ما هو التطبيق الذي تستخدمه؟"، "ما هي الأعمدة المعنية؟").
 """,
-        "logging_disclaimer": "⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*"
+        "logging_disclaimer": "⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
+        "quick_start_prompt": "جرب أحد هذه الأمثلة 💡:",
+        "ex_avg": "حساب المتوسط",
+        "ex_dup": "حذف التكرارات",
+        "ex_sales": "تحليل المبيعات",
+        "ex_forecast": "توقعات الاتجاهات"
     }
 }
 
