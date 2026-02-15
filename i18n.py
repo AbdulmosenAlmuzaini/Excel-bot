@@ -47,10 +47,12 @@ If the request is unclear:
 """,
         "logging_disclaimer": "⚠️ *Messages may be logged for improvement purposes.*",
         "quick_start_prompt": "Try one of these examples 💡:",
-        "ex_avg": "Calculate Average",
-        "ex_dup": "Remove Duplicates",
-        "ex_sales": "Analyze Sales",
-        "ex_forecast": "Forecast Trends"
+        "ex_learning": "Learn Functions",
+        "ex_formatting": "Fix Formatting",
+        "ex_analysis": "Data Analysis",
+        "ex_protect": "Protect File",
+        "ex_other": "Other Question",
+        "ex_other_prompt": "Please describe your issue or upload an Excel file, and I will help you step-by-step."
     },
     "ar": {
         "bot_intro": "أهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊\n\n⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
@@ -100,10 +102,12 @@ If the request is unclear:
 """,
         "logging_disclaimer": "⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
         "quick_start_prompt": "جرب أحد هذه الأمثلة 💡:",
-        "ex_avg": "حساب المتوسط",
-        "ex_dup": "حذف التكرارات",
-        "ex_sales": "تحليل المبيعات",
-        "ex_forecast": "توقعات الاتجاهات"
+        "ex_learning": "تعلم الدوال",
+        "ex_formatting": "إصلاح التنسيق",
+        "ex_analysis": "تحليل البيانات",
+        "ex_protect": "حماية الملف",
+        "ex_other": "سؤال آخر",
+        "ex_other_prompt": "يرجى وصف مشكلتك أو رفع ملف إكسل، وسأقوم بمساعدتك خطوة بخطوة."
     }
 }
 

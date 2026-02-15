@@ -42,10 +42,11 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_quick_start(message, context, lang):
     keyboard = [
-        [InlineKeyboardButton(get_text("ex_avg", lang), callback_data='ex_avg')],
-        [InlineKeyboardButton(get_text("ex_dup", lang), callback_data='ex_dup')],
-        [InlineKeyboardButton(get_text("ex_sales", lang), callback_data='ex_sales')],
-        [InlineKeyboardButton(get_text("ex_forecast", lang), callback_data='ex_forecast')]
+        [InlineKeyboardButton(get_text("ex_learning", lang), callback_data='ex_learning')],
+        [InlineKeyboardButton(get_text("ex_formatting", lang), callback_data='ex_formatting')],
+        [InlineKeyboardButton(get_text("ex_analysis", lang), callback_data='ex_analysis')],
+        [InlineKeyboardButton(get_text("ex_protect", lang), callback_data='ex_protect')],
+        [InlineKeyboardButton(get_text("ex_other", lang), callback_data='ex_other')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_text(get_text("quick_start_prompt", lang), reply_markup=reply_markup)
@@ -58,7 +59,24 @@ async def example_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(user_id)
     lang = user[1] if user else "en"
     
-    example_key = query.data # e.g., 'ex_avg'
+    example_key = query.data # e.g., 'ex_learning'
+    
+    if example_key == "ex_other":
+        # Special logic for "Other Question"
+        await query.message.reply_text(get_text("ex_other_prompt", lang))
+        
+        # Show clarification options immediately to guide them
+        keyboard = [
+            [InlineKeyboardButton(get_text("opt_analysis", lang), callback_data='clarify_analysis')],
+            [InlineKeyboardButton(get_text("opt_formula", lang), callback_data='clarify_formula')],
+            [InlineKeyboardButton(get_text("opt_chart", lang), callback_data='clarify_chart')],
+            [InlineKeyboardButton(get_text("opt_forecast", lang), callback_data='clarify_forecast')],
+            [InlineKeyboardButton(get_text("opt_cleaning", lang), callback_data='clarify_cleaning')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(get_text("clarification_intro", lang), reply_markup=reply_markup)
+        return
+
     example_text = get_text(example_key, lang)
     
     # 1. Inform the user what's happening
