@@ -24,10 +24,8 @@ class GroqClient:
         relevant_video = self.yt_client.find_relevant_video(user_query)
         if relevant_video:
             video_url = f"https://www.youtube.com/watch?v={relevant_video['id']}"
-            if lang == "ar":
-                video_suggestion = f"💡 قد يهمك هذا الفيديو التعليمي: [{relevant_video['title']}]({video_url})\n\n"
-            else:
-                video_suggestion = f"💡 You might find this tutorial helpful: [{relevant_video['title']}]({video_url})\n\n"
+            from i18n import get_text
+            video_suggestion = get_text("video_suggestion_prefix", lang, relevant_video['title'], video_url)
             log_info(f"Found relevant YouTube video for '{user_query}': {relevant_video['title']}", category="YouTube")
 
         # Hardcoded base prompt

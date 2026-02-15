@@ -40,6 +40,8 @@ async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await query.edit_message_text(get_text("lang_selected", lang))
     await show_quick_start(query.message, context, lang)
+    # help message is already sent inside show_quick_start if needed, 
+    # but here we follow the existing flow.
     await query.message.reply_text(get_text("help", lang))
 
 async def show_quick_start(message, context, lang):
@@ -394,10 +396,10 @@ async def logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     logs = get_admin_logs(limit, target_user)
     if not logs:
-        await update.message.reply_text("No logs found.")
+        await update.message.reply_text(get_text("admin_no_logs", "en"))
         return
     
-    msg = "Recent Chat Logs:\n"
+    msg = get_text("admin_logs_header", "en")
     for log in logs:
         # id, user_id, user_message, bot_reply, timestamp
         msg += f"\n👤 User {log[1]} ({log[4]}):\nQ: {log[2][:100]}...\nA: {log[3][:100]}...\n---"
@@ -412,7 +414,7 @@ async def export_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     if update.effective_user.id != ADMIN_ID:
         return
     
-    await update.message.reply_text("Generating Excel report...")
+    await update.message.reply_text(get_text("admin_exporting", "en")) # Admin strings can be English for now
     try:
         file_path = export_logs_to_excel()
         with open(file_path, 'rb') as f:
@@ -420,7 +422,7 @@ async def export_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         os.remove(file_path)
     except Exception as e:
         log_error(f"Export logs error: {e}")
-        await update.message.reply_text("Failed to export logs.")
+        await update.message.reply_text(get_text("error_generic", "en"))
 
 async def learn_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = get_user(update.effective_user.id)
@@ -457,7 +459,7 @@ async def learning_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         videos = yt_client.get_videos_by_level(level)
         
         if not videos:
-            await query.edit_message_text("No videos found in this category yet.",
+            await query.edit_message_text(get_text("learn_no_videos", lang),
                                          reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(get_text("learn_back", lang), callback_data='learn_main')]]))
             return
 
@@ -493,18 +495,11 @@ async def video_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     if video:
         video_url = f"https://www.youtube.com/watch?v={video['id']}"
-        if lang == "ar":
-            msg = f"✅ إليك أفضل فيديو تعليمي وجدته:\n\n*[{video['title']}]({video_url})*"
-        else:
-            msg = f"✅ Here is the best tutorial I found:\n\n*[{video['title']}]({video_url})*"
+        msg = get_text("video_found_msg", lang, video['title'], video_url)
         await query.message.reply_text(msg, parse_mode="Markdown")
         log_interaction(user_id, f"VIDEO_REQ: {search_query}", video_url, "video_link")
     else:
-        if lang == "ar":
-            msg = "عذراً، لم أجد فيديو تعليمي يطابق طلبك بالضبط في هذه اللغة. سأحاول مساعدتك عبر الذكاء الاصطناعي."
-        else:
-            msg = "Sorry, I couldn't find a matching tutorial in that language. I'll try to help you with an AI response."
-        await query.message.reply_text(msg)
+        await query.message.reply_text(get_text("video_not_found_msg", lang))
         
         # Fallback to AI
         await query.message.reply_chat_action("typing")

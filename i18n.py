@@ -60,9 +60,16 @@ If the request is unclear:
         "learn_advanced": "🔴 Advanced",
         "learn_video_intro": "Select a tutorial to watch on YouTube:",
         "learn_back": "⬅️ Back to Categories",
+        "learn_no_videos": "No videos found in this category yet.",
         "video_lang_prompt": "Do you prefer Arabic or English videos? 🎬",
         "btn_video_en": "🇺🇸 English Tutorials",
-        "btn_video_ar": "🇸🇦 Arabic Tutorials"
+        "btn_video_ar": "🇸🇦 Arabic Tutorials",
+        "video_found_msg": "✅ Here is the best tutorial I found:\n\n*[{}]({})*",
+        "video_not_found_msg": "Sorry, I couldn't find a matching tutorial in that language. I'll try to help you with an AI response.",
+        "video_suggestion_prefix": "💡 You might find this tutorial helpful: [{}]({})\n\n",
+        "admin_exporting": "Generating Excel report...",
+        "admin_no_logs": "No logs found.",
+        "admin_logs_header": "Recent Chat Logs:\n"
     },
     "ar": {
         "bot_intro": "أهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊\n\n⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
@@ -125,9 +132,16 @@ If the request is unclear:
         "learn_advanced": "🔴 متقدم",
         "learn_video_intro": "اختر درساً لمشاهدته على YouTube:",
         "learn_back": "⬅️ العودة للتصنيفات",
+        "learn_no_videos": "لا يوجد دروس تعليمية في هذا التصنيف حالياً.",
         "video_lang_prompt": "هل تفضل الدروس التعليمية باللغة العربية أم الإنجليزية؟ 🎬",
         "btn_video_en": "🇺🇸 دروس بالإنجليزية",
-        "btn_video_ar": "🇸🇦 دروس بالعربية"
+        "btn_video_ar": "🇸🇦 دروس بالعربية",
+        "video_found_msg": "✅ إليك أفضل فيديو تعليمي وجدته:\n\n*[{}]({})*",
+        "video_not_found_msg": "عذراً، لم أجد فيديو تعليمي يطابق طلبك في تلك اللغة. سأقوم بمساعدتك عبر الذكاء الاصطناعي.",
+        "video_suggestion_prefix": "💡 قد يهمك هذا الفيديو التعليمي: [{}]({})\n\n",
+        "admin_exporting": "جاري إنشاء تقرير إكسل...",
+        "admin_no_logs": "لم يتم العثور على سجلات.",
+        "admin_logs_header": "سجلات المحادثات الأخيرة:\n"
     }
 }
 
