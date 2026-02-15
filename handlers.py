@@ -179,6 +179,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 2. State & Context
     state, user_context = get_user_state(user_id)
 
+    # --- NEW: Detect explicit video requests ---
+    video_keywords = ["video", "tutorial", "youtube", "فيديو", "شرح", "يوتيوب", "درس", "تعليمي"]
+    is_video_request = any(kw in query_text.lower() for kw in video_keywords)
+    
+    if is_video_request and state == "NORMAL":
+        # Save search query in state and ask for language preference
+        update_user_state(user_id, "WAIT_VIDEO_LANG", {"query": query_text})
+        
+        keyboard = [
+            [InlineKeyboardButton(get_text("btn_video_ar", lang), callback_data='vlang_ar')],
+            [InlineKeyboardButton(get_text("btn_video_en", lang), callback_data='vlang_en')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(get_text("video_lang_prompt", lang), reply_markup=reply_markup)
+        return
+
     # Process Wait Feedback state
     if state == "WAIT_FEEDBACK":
         log_feedback(user_id, "SUGGESTION", query_text)
@@ -454,6 +470,52 @@ async def learning_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         level_label = get_text(f"learn_{level}", lang)
         await query.edit_message_text(f"{level_label}\n\n{get_text('learn_video_intro', lang)}", reply_markup=reply_markup)
+
+async def video_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    user_id = query.from_user.id
+    user = get_user(user_id)
+    lang = user[1] if user else "en"
+    
+    # Get stored query from state
+    state, data = get_user_state(user_id)
+    if state != "WAIT_VIDEO_LANG" or not data:
+        await query.message.reply_text(get_text("error_generic", lang))
+        return
+    
+    search_query = data.get("query", "")
+    selected_lang = query.data.replace("vlang_", "") # ar or en
+    
+    # Find matching video
+    video = yt_client.find_relevant_video(search_query, language=selected_lang)
+    
+    if video:
+        video_url = f"https://www.youtube.com/watch?v={video['id']}"
+        if lang == "ar":
+            msg = f"✅ إليك أفضل فيديو تعليمي وجدته:\n\n*[{video['title']}]({video_url})*"
+        else:
+            msg = f"✅ Here is the best tutorial I found:\n\n*[{video['title']}]({video_url})*"
+        await query.message.reply_text(msg, parse_mode="Markdown")
+        log_interaction(user_id, f"VIDEO_REQ: {search_query}", video_url, "video_link")
+    else:
+        if lang == "ar":
+            msg = "عذراً، لم أجد فيديو تعليمي يطابق طلبك بالضبط في هذه اللغة. سأحاول مساعدتك عبر الذكاء الاصطناعي."
+        else:
+            msg = "Sorry, I couldn't find a matching tutorial in that language. I'll try to help you with an AI response."
+        await query.message.reply_text(msg)
+        
+        # Fallback to AI
+        await query.message.reply_chat_action("typing")
+        response = await groq.get_response(search_query, lang=lang)
+        if response:
+            await update_message_with_markdown_fallback(query, response, lang)
+            log_interaction(user_id, search_query, response, "text")
+            log_chat(user_id, search_query, response)
+
+    # Clear state
+    update_user_state(user_id, "NORMAL", {})
 
 async def feedback_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id

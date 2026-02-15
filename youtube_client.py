@@ -25,13 +25,18 @@ class YouTubeClient:
         """Filter videos by level: Beginner, Intermediate, Advanced"""
         return [v for v in self.videos if v['level'].lower() == level.lower()]
 
-    def find_relevant_video(self, query):
+    def find_relevant_video(self, query, language=None):
         """Find the most relevant video based on tags and query text"""
         query_lower = query.lower()
         best_match = None
         highest_score = 0
 
-        for video in self.videos:
+        # Filter by language if specified
+        target_videos = self.videos
+        if language:
+            target_videos = [v for v in self.videos if v.get('language') == language]
+
+        for video in target_videos:
             score = 0
             # Check tags
             for tag in video.get('tags', []):

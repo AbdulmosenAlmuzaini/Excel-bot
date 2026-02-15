@@ -3,6 +3,7 @@
         "id": "qMTCX-MAn6o",
         "title": "Excel for Beginners",
         "level": "Beginner",
+        "language": "en",
         "tags": [
             "beginner",
             "intro",
@@ -18,6 +19,7 @@
         "id": "n6VOfzN9tRE",
         "title": "Basic Formulas: SUM, AVERAGE, COUNT",
         "level": "Beginner",
+        "language": "en",
         "tags": [
             "sum",
             "average",
@@ -32,6 +34,7 @@
         "id": "f_p48i5Wcl8",
         "title": "VLOOKUP Masterclass",
         "level": "Intermediate",
+        "language": "en",
         "tags": [
             "vlookup",
             "lookup",
@@ -45,6 +48,7 @@
         "id": "3kbk77mJp_0",
         "title": "Pivot Tables for Data Analysis",
         "level": "Intermediate",
+        "language": "en",
         "tags": [
             "pivot table",
             "analysis",
@@ -58,6 +62,7 @@
         "id": "W6L9_u4S5Ww",
         "title": "Advanced VBA & Macros",
         "level": "Advanced",
+        "language": "en",
         "tags": [
             "vba",
             "macro",
@@ -72,6 +77,7 @@
         "id": "mXf9cK_S-mE",
         "title": "Forecasting & Predictive Analytics",
         "level": "Advanced",
+        "language": "en",
         "tags": [
             "forecast",
             "trends",
@@ -79,6 +85,49 @@
             "statistics",
             "data science",
             "regression"
+        ]
+    },
+    {
+        "id": "Tndw08rNoY0",
+        "title": "دورة اكسل للمبتدئين من الصفر",
+        "level": "Beginner",
+        "language": "ar",
+        "tags": [
+            "مبتدئ",
+            "أساسيات",
+            "تعلم",
+            "شرح",
+            "واجهة",
+            "خلايا"
+        ]
+    },
+    {
+        "id": "O6o_M_LCH0w",
+        "title": "دوال الإكسل الأساسية: SUM, IF, VLOOKUP",
+        "level": "Intermediate",
+        "language": "ar",
+        "tags": [
+            "دوال",
+            "معادلات",
+            "بحث",
+            "إكسل",
+            "عربي",
+            "vlookup",
+            "if"
+        ]
+    },
+    {
+        "id": "-vW32Ew6p6E",
+        "title": "برمجة الإكسل VBA - الماكرو",
+        "level": "Advanced",
+        "language": "ar",
+        "tags": [
+            "برمجة",
+            "ماكرو",
+            "أكواد",
+            "تطوير",
+            "vba",
+            "macro"
         ]
     }
 ]

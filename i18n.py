@@ -59,7 +59,10 @@ If the request is unclear:
         "learn_intermediate": "🟡 Intermediate",
         "learn_advanced": "🔴 Advanced",
         "learn_video_intro": "Select a tutorial to watch on YouTube:",
-        "learn_back": "⬅️ Back to Categories"
+        "learn_back": "⬅️ Back to Categories",
+        "video_lang_prompt": "Do you prefer Arabic or English videos? 🎬",
+        "btn_video_en": "🇺🇸 English Tutorials",
+        "btn_video_ar": "🇸🇦 Arabic Tutorials"
     },
     "ar": {
         "bot_intro": "أهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊\n\n⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
@@ -121,7 +124,10 @@ If the request is unclear:
         "learn_intermediate": "🟡 متوسط",
         "learn_advanced": "🔴 متقدم",
         "learn_video_intro": "اختر درساً لمشاهدته على YouTube:",
-        "learn_back": "⬅️ العودة للتصنيفات"
+        "learn_back": "⬅️ العودة للتصنيفات",
+        "video_lang_prompt": "هل تفضل الدروس التعليمية باللغة العربية أم الإنجليزية؟ 🎬",
+        "btn_video_en": "🇺🇸 دروس بالإنجليزية",
+        "btn_video_ar": "🇸🇦 دروس بالعربية"
     }
 }
 

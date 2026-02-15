@@ -1,6 +1,6 @@
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters
 from config import TELEGRAM_BOT_TOKEN
-from handlers import start, language_callback, help_command, examples_command, lang_command, handle_message, handle_document, admin_stats, clarification_callback, feedback_command, feedback_callback, logs_command, export_logs_command, example_callback, learn_command, learning_callback
+from handlers import start, language_callback, help_command, examples_command, lang_command, handle_message, handle_document, admin_stats, clarification_callback, feedback_command, feedback_callback, logs_command, export_logs_command, example_callback, learn_command, learning_callback, video_lang_callback
 from database import init_db
 from logger import log_info, log_error
 
@@ -26,6 +26,7 @@ def main():
     application.add_handler(CallbackQueryHandler(language_callback, pattern='^lang_'))
     application.add_handler(CallbackQueryHandler(clarification_callback, pattern='^clarify_'))
     application.add_handler(CallbackQueryHandler(feedback_callback, pattern='^rate_'))
+    application.add_handler(CallbackQueryHandler(video_lang_callback, pattern='^vlang_'))
     application.add_handler(CallbackQueryHandler(example_callback, pattern='^ex_'))
     application.add_handler(CallbackQueryHandler(learning_callback, pattern='^learn_'))
     
