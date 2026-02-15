@@ -48,7 +48,8 @@ async def show_quick_start(message, context, lang):
         [InlineKeyboardButton(get_text("ex_formatting", lang), callback_data='ex_formatting')],
         [InlineKeyboardButton(get_text("ex_analysis", lang), callback_data='ex_analysis')],
         [InlineKeyboardButton(get_text("ex_protect", lang), callback_data='ex_protect')],
-        [InlineKeyboardButton(get_text("ex_other", lang), callback_data='ex_other')]
+        [InlineKeyboardButton(get_text("ex_other", lang), callback_data='ex_other')],
+        [InlineKeyboardButton(get_text("main_learn", lang), callback_data='learn_main')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_text(get_text("quick_start_prompt", lang), reply_markup=reply_markup)
