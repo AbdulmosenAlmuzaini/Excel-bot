@@ -431,7 +431,8 @@ async def learn_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton(get_text("learn_beginner", lang), callback_data='learn_cat_beginner')],
         [InlineKeyboardButton(get_text("learn_intermediate", lang), callback_data='learn_cat_intermediate')],
-        [InlineKeyboardButton(get_text("learn_advanced", lang), callback_data='learn_cat_advanced')]
+        [InlineKeyboardButton(get_text("learn_advanced", lang), callback_data='learn_cat_advanced')],
+        [InlineKeyboardButton(get_text("btn_main_menu", lang), callback_data='learn_exit')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(get_text("learn_intro", lang), reply_markup=reply_markup, parse_mode="Markdown")
@@ -448,10 +449,15 @@ async def learning_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [
             [InlineKeyboardButton(get_text("learn_beginner", lang), callback_data='learn_cat_beginner')],
             [InlineKeyboardButton(get_text("learn_intermediate", lang), callback_data='learn_cat_intermediate')],
-            [InlineKeyboardButton(get_text("learn_advanced", lang), callback_data='learn_cat_advanced')]
+            [InlineKeyboardButton(get_text("learn_advanced", lang), callback_data='learn_cat_advanced')],
+            [InlineKeyboardButton(get_text("btn_main_menu", lang), callback_data='learn_exit')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text(get_text("learn_intro", lang), reply_markup=reply_markup, parse_mode="Markdown")
+        return
+
+    if data == "learn_exit":
+        await show_quick_start(query.message, context, lang)
         return
 
     if data.startswith("learn_cat_"):
@@ -459,8 +465,11 @@ async def learning_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         videos = yt_client.get_videos_by_level(level)
         
         if not videos:
-            await query.edit_message_text(get_text("learn_no_videos", lang),
-                                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(get_text("learn_back", lang), callback_data='learn_main')]]))
+            keyboard = [
+                [InlineKeyboardButton(get_text("learn_back", lang), callback_data='learn_main')],
+                [InlineKeyboardButton(get_text("btn_main_menu", lang), callback_data='learn_exit')]
+            ]
+            await query.edit_message_text(get_text("learn_no_videos", lang), reply_markup=InlineKeyboardMarkup(keyboard))
             return
 
         keyboard = []
@@ -468,6 +477,7 @@ async def learning_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard.append([InlineKeyboardButton(f"🎬 {video['title']}", url=f"https://www.youtube.com/watch?v={video['id']}")])
         
         keyboard.append([InlineKeyboardButton(get_text("learn_back", lang), callback_data='learn_main')])
+        keyboard.append([InlineKeyboardButton(get_text("btn_main_menu", lang), callback_data='learn_exit')])
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         level_label = get_text(f"learn_{level}", lang)

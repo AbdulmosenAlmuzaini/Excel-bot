@@ -69,7 +69,8 @@ If the request is unclear:
         "video_suggestion_prefix": "💡 You might find this tutorial helpful: [{}]({})\n\n",
         "admin_exporting": "Generating Excel report...",
         "admin_no_logs": "No logs found.",
-        "admin_logs_header": "Recent Chat Logs:\n"
+        "admin_logs_header": "Recent Chat Logs:\n",
+        "btn_main_menu": "🏠 Back to Main Menu"
     },
     "ar": {
         "bot_intro": "أهلاً بك في بوت خبير الإكسل وجداول بيانات جوجل! 🚀\nأستطيع مساعدتك في بناء معادلات متقدمة، تحليل بيانات معقدة، إنشاء رسوم بيانية، وتوقع الاتجاهات المستقبلية. 📊\n\n⚠️ *قد يتم تسجيل الرسائل لأغراض تحسين الخدمة.*",
@@ -141,7 +142,8 @@ If the request is unclear:
         "video_suggestion_prefix": "💡 قد يهمك هذا الفيديو التعليمي: [{}]({})\n\n",
         "admin_exporting": "جاري إنشاء تقرير إكسل...",
         "admin_no_logs": "لم يتم العثور على سجلات.",
-        "admin_logs_header": "سجلات المحادثات الأخيرة:\n"
+        "admin_logs_header": "سجلات المحادثات الأخيرة:\n",
+        "btn_main_menu": "🏠 العودة للقائمة الرئيسية"
     }
 }
 
