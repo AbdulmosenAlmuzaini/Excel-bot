@@ -74,8 +74,8 @@ If a question is unrelated, politely decline in the chosen language.
         core_keywords = ["excel", "vlookup", "hlookup", "pivot", "vba", "macro", "index", "match", "xlsx", "google sheets", "spreadsheet"]
         broad_keywords = ["sheet", "formula", "chart", "table", "cell", "row", "column", "data", "analysis", "forecast", "stats", "filter", "unique", "google", "office", "csv", "dashboard", "summarize", "aggregate", "group"]
         
-        ar_core = ["اكسل", "إكسل", "معادلة", "صيغة", "دالة", "ماكرو", "سبريدشيت"]
-        ar_broad = ["جدول", "جداول", "بيانات", "عمود", "صف", "خلية", "تنسيق", "تحليل", "توقع", "شرط", "مجموع", "بحث", "فلترة", "تصفية", "فرز", "تقرير", "تلخيص", "تجميع"]
+        ar_core = ["اكسل", "إكسل", "معادلة", "صيغة", "دالة", "ماكرو", "سبريدشيت", "فانكشن"]
+        ar_broad = ["جدول", "جداول", "بيانات", "عمود", "صف", "خلية", "تنسيق", "تحليل", "توقع", "شرط", "مجموع", "بحث", "فلترة", "تصفية", "فرز", "تقرير", "تلخيص", "تجميع", "طلاب", "طالب", "موظف", "مستوى", "درجات"]
         
         has_core = any(kw in text_lower for kw in core_keywords + ar_core)
         has_broad = any(kw in text_lower for kw in broad_keywords + ar_broad)
@@ -111,8 +111,8 @@ If a question is unrelated, politely decline in the chosen language.
             score += 10
             
         # 5. Question starters & Contextual phrases
-        starters = ["how", "what", "provide", "give", "create", "show", "help", "can", "i have", "i want", "is there", "my data"]
-        ar_starters = ["كيف", "ماذا", "أعطني", "اريد", "أريد", "ممكن", "ساعدني", "كيفية", "عندي", "لدي", "أريد", "هل هناك", "بياناتي"]
+        starters = ["how", "what", "provide", "give", "create", "show", "help", "can", "i have", "i want", "is there", "my data", "do i"]
+        ar_starters = ["كيف", "ماذا", "أعطني", "اريد", "أريد", "ممكن", "ساعدني", "كيفية", "عندي", "لدي", "أريد", "هل هناك", "بياناتي", "أبغى", "ابغى", "ابي", "أبي"]
         if any(text_lower.startswith(s) or (s in text_lower[:15]) for s in starters + ar_starters):
             score += 15
                 
@@ -137,7 +137,7 @@ If a question is unrelated, politely decline in the chosen language.
             "تنسيق", "تحليل", "توقع", "شرط", "مجموع", "متوسط", "بحث", "فلترة", "تصفية", "فرز", "تقرير",
             "دوال", "شيت", "سبريدشيت", "ماكرو", "رسم_بياني", "تحقق", "مخطط",
             "أفضل", "أسوأ", "أعلى", "أقل", "مقارنة", "توجه", "سنة", "شهر", "أداء", "نمو", "زيادة", "نقص",
-            "فرق", "احسب", "تحليل", "تلخيص", "تجميع"
+            "فرق", "احسب", "تحليل", "تلخيص", "تجميع", "أبغى", "ابغى", "طلاب", "طالب", "مستوى"
         ]
         text_lower = text.lower()
         

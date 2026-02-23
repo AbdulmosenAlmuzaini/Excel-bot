@@ -248,9 +248,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(get_text("invalid_topic", lang))
         return
 
-    # 7. Clarification (Preferred over rejection for borderline cases)
-    # If score is low OR topic is vague AND not already in a thread
-    if (score < 60 or topic_status == "vague") and not history:
+    # 7. Clarification Logic
+    should_clarify_immediately = score < 40 and not history
+    should_suggest_clarification = (score < 70 or topic_status == "vague") and not history and not should_clarify_immediately
+
+    if should_clarify_immediately:
         attempts = user_context.get("attempts", 0) + 1
         if attempts >= 2:
             await update.message.reply_text(get_text("escalation_msg", lang))
@@ -258,7 +260,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
             
         user_context = {"attempts": attempts, "original_query": query_text}
-        update_user_state(user_id, "NORMAL", user_context) # Keep attempts count
+        update_user_state(user_id, "NORMAL", user_context)
         
         keyboard = [
             [InlineKeyboardButton(get_text("opt_analysis", lang), callback_data='clarify_analysis')],
@@ -286,6 +288,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update_message_with_markdown_fallback(update, response, lang)
         log_interaction(user_id, query_text, response, "text")
         log_chat(user_id, query_text, response)
+        
+        # If it was a borderline case, offer guided help as a SUGGESTION after the response
+        if should_suggest_clarification:
+            keyboard = [
+                [InlineKeyboardButton(get_text("opt_analysis", lang), callback_data='clarify_analysis')],
+                [InlineKeyboardButton(get_text("opt_formula", lang), callback_data='clarify_formula')],
+                [InlineKeyboardButton(get_text("opt_chart", lang), callback_data='clarify_chart')],
+                [InlineKeyboardButton(get_text("opt_forecast", lang), callback_data='clarify_forecast')],
+                [InlineKeyboardButton(get_text("opt_cleaning", lang), callback_data='clarify_cleaning')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            # Use specific suggestion text
+            await update.message.reply_text(get_text("clarification_suggestion", lang), reply_markup=reply_markup)
     else:
         await update.message.reply_text(get_text("error_generic", lang))
 
